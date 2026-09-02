@@ -1,0 +1,16 @@
+# Environment and secrets
+api/.env
+**/.env
+**/.env.*
+!.env.example
+
+# Dependencies and generated output
+api/node_modules/
+api/dist/
+api/coverage/
+api/generated/prisma/
+api/.git.api-backup/
+
+# Local tooling and OS files
+.DS_Store
+.vscode/*.log
