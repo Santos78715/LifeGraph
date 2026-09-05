@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
-import { JournalModule } from './journal/journal.module';
 import { MemoryModule } from './memory/memory.module';
 import { EntityModule } from './entity/entity.module';
 import { RelationshipsModule } from './relationships/relationships.module';
@@ -19,9 +18,11 @@ import { GoalModule } from './goal/goal.module';
 import { TaskModule } from './task/task.module';
 import { HabitModule } from './habit/habit.module';
 import { EventModule } from './event/event.module';
-
+import { QueueModule } from './queue/queue.module';
+import { JournalModule } from './journal/journal.module';
 @Module({
   imports: [
+    QueueModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -47,6 +48,7 @@ import { EventModule } from './event/event.module';
     TaskModule,
     HabitModule,
     EventModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],

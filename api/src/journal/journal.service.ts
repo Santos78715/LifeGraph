@@ -2,13 +2,26 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateJournalDto } from './dto/create-journal.dto';
 import { UpdateJournalDto } from './dto/update-journal.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { JournalProducer } from './journel.producer';
+import { MemorySourceType } from 'generated/prisma/enums';
 
 @Injectable()
 export class JournalService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private journel: JournalProducer,
+  ) {}
 
-  create(createJournalDto: CreateJournalDto) {
-    return this.prisma.journalEntry.create({ data: createJournalDto });
+  async create(createJournalDto: CreateJournalDto) {
+    const journal = await this.prisma.journalEntry.create({
+      data: createJournalDto,
+    });
+    await this.journel.addJob({
+      userId: createJournalDto.userId,
+      sourceId: journal.id,
+      content: journal.content,
+      sourceType: MemorySourceType.JOURNAL_ENTRY,
+    });
   }
 
   findAll() {
