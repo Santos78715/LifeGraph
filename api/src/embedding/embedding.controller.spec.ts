@@ -8,7 +8,7 @@ describe('EmbeddingController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EmbeddingController],
-      providers: [EmbeddingService],
+      providers: [{ provide: EmbeddingService, useValue: {} }],
     }).compile();
 
     controller = module.get<EmbeddingController>(EmbeddingController);

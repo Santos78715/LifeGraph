@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "installCommand": "cd api && npm ci",
+  "buildCommand": "cd api && npm run build",
+  "builds": [
+    {
+      "src": "api/src/serverless.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["api/prisma/**", "api/generated/prisma/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/src/serverless.ts"
+    }
+  ]
+}

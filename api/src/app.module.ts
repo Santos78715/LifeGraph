@@ -22,7 +22,6 @@ import { QueueModule } from './queue/queue.module';
 import { JournalModule } from './journal/journal.module';
 @Module({
   imports: [
-    QueueModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -48,7 +47,6 @@ import { JournalModule } from './journal/journal.module';
     TaskModule,
     HabitModule,
     EventModule,
-    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],

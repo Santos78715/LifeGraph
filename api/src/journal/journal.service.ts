@@ -3,7 +3,6 @@ import { CreateJournalDto } from './dto/create-journal.dto';
 import { UpdateJournalDto } from './dto/update-journal.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JournalProducer } from './journel.producer';
-import { MemorySourceType } from 'generated/prisma/enums';
 
 @Injectable()
 export class JournalService {
@@ -16,12 +15,14 @@ export class JournalService {
     const journal = await this.prisma.journalEntry.create({
       data: createJournalDto,
     });
-    await this.journel.addJob({
-      userId: createJournalDto.userId,
-      sourceId: journal.id,
-      content: journal.content,
-      sourceType: MemorySourceType.JOURNAL_ENTRY,
+    const jobId = await this.journel.addJob({
+      journalEntryId: journal.id,
+      userId: journal.userId,
+      title: createJournalDto.title,
+      content: createJournalDto.content,
     });
+
+    return { journal, jobId };
   }
 
   findAll() {

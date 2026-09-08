@@ -4,7 +4,6 @@ import { JournalController } from './journal.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { BullModule } from '@nestjs/bullmq';
 import { QUEUE_NAMES } from 'src/queue/queue.constants';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { JournalProducer } from './journel.producer';
 import { JournalConsumer } from './journel.consumer';
 import { AiModule } from 'src/ai/ai.module';
@@ -18,6 +17,7 @@ import { AiModule } from 'src/ai/ai.module';
     AiModule,
   ],
   controllers: [JournalController],
-  providers: [JournalService, PrismaService, JournalProducer, JournalConsumer],
+  providers: [JournalService, JournalProducer, JournalConsumer],
+  exports: [JournalConsumer],
 })
 export class JournalModule {}

@@ -50,6 +50,7 @@ model LifeEntity {
   @@index([userId])
   @@index([userId, type])
   @@index([userId, name])
+  @@unique([userId, type, name])
 }
 
 model JournalEntry {
@@ -84,6 +85,7 @@ model Memory {
   @@index([userId, type])
   @@index([userId, expiresAt])
   @@index([sourceType, sourceId])
+  @@unique([sourceType, sourceId, content])
 }
 
 model EntityRelationship {
@@ -244,6 +246,7 @@ model Embedding {
 
   @@index([userId, sourceType])
   @@index([sourceType, sourceId])
+  @@unique([userId, sourceType, sourceId])
 }
 
 model AIInteraction {
@@ -335,6 +338,7 @@ enum MemorySourceType {
   GOAL
   DOCUMENT
   ENTITY
+  MEMORY
 }
 
 enum RelationshipType {

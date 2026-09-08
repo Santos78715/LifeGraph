@@ -10,15 +10,24 @@ export type JournalEmbeddingJob = {
   sourceId: string;
 };
 
+export type JournalExtractionJob = {
+  journalEntryId: string;
+  userId: string;
+  title: string;
+  content: string;
+};
+
 @Injectable()
 export class JournalProducer {
   constructor(
     @InjectQueue(QUEUE_NAMES.JOURNAL_QUEUE) private journalQueue: Queue,
   ) {}
 
-  async addJob(input: JournalEmbeddingJob): Promise<void> {
-    console.log('Adding job to the queue:', input);
-    const job = await this.journalQueue.add('journel_services', input, {
+  async addJob(input: JournalExtractionJob): Promise<string> {
+    const job = await this.journalQueue.add('journal_extraction', input, {
+      // A stable ID prevents duplicate queued work for the same journal entry.
+      // BullMQ job IDs may not contain Redis's colon separator.
+      jobId: `journal-extraction-${input.journalEntryId}`,
       priority: 2,
       attempts: 3,
       removeOnComplete: true,
@@ -28,5 +37,7 @@ export class JournalProducer {
         delay: 1000,
       },
     });
+
+    return String(job.id);
   }
 }
