@@ -91,6 +91,7 @@
     },
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1",
+      "^generated/(.*)$": "<rootDir>/../generated/$1",
       "^@nestjs/bullmq$": "<rootDir>/test/mocks/nest-bullmq.ts"
     },
     "collectCoverageFrom": [

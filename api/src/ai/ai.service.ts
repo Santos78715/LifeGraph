@@ -26,6 +26,27 @@ export class AiService {
     return response;
   }
 
+  async answerWithContext(question: string, context: string) {
+    return this.generateText(
+      `Question: ${question}\n\nRetrieved knowledge:\n${context}`,
+      'Answer only from the retrieved knowledge. If the knowledge does not answer the question, say that you do not have enough information. Cite supporting sources with their bracketed source number, for example [1]. Do not invent facts.',
+    );
+  }
+
+  async generateText(prompt: string, systemInstruction: string) {
+    const response = await this.ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        systemInstruction,
+      },
+    });
+    if (!response.text?.trim()) {
+      throw new Error('The AI provider returned an empty answer');
+    }
+    return response.text.trim();
+  }
+
   async aiInteraction(
     inputs: { content: string },
     schema: unknown,

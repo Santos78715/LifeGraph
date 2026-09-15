@@ -20,6 +20,7 @@ import { HabitModule } from './habit/habit.module';
 import { EventModule } from './event/event.module';
 import { QueueModule } from './queue/queue.module';
 import { JournalModule } from './journal/journal.module';
+import { DocumentModule } from './document/document.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,6 +36,7 @@ import { JournalModule } from './journal/journal.module';
     AuthModule,
     UserModule,
     JournalModule,
+    DocumentModule,
     MemoryModule,
     EntityModule,
     RelationshipsModule,

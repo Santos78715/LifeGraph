@@ -26,8 +26,16 @@ export const journalJSONSchema: z.core.JSONSchema.JSONSchema = {
           type: {
             type: 'string',
             enum: [
-              'PERSON', 'PLACE', 'PROJECT', 'GOAL', 'HABIT', 'EVENT',
-              'ORGANIZATION', 'SKILL', 'TOPIC', 'OBJECT',
+              'PERSON',
+              'PLACE',
+              'PROJECT',
+              'GOAL',
+              'HABIT',
+              'EVENT',
+              'ORGANIZATION',
+              'SKILL',
+              'TOPIC',
+              'OBJECT',
             ],
             description: 'The entity category.',
           },
@@ -53,7 +61,15 @@ export const journalJSONSchema: z.core.JSONSchema.JSONSchema = {
 
           type: {
             type: 'string',
-            enum: ['FACT', 'PREFERENCE', 'EXPERIENCE', 'DECISION', 'INSIGHT', 'GOAL', 'BELIEF'],
+            enum: [
+              'FACT',
+              'PREFERENCE',
+              'EXPERIENCE',
+              'DECISION',
+              'INSIGHT',
+              'GOAL',
+              'BELIEF',
+            ],
             description:
               'The category of the memory, such as EVENT, EXPERIENCE, ACHIEVEMENT, or FACT.',
           },
@@ -84,7 +100,22 @@ export const journalJSONSchema: z.core.JSONSchema.JSONSchema = {
 
           type: {
             type: 'string',
-            enum: ['WORKED_ON', 'KNOWS', 'LIVES_IN', 'VISITED', 'RELATED_TO', 'PART_OF', 'CAUSED_BY', 'LEADS_TO', 'CONFLICTS_WITH', 'SUPPORTS', 'DEPENDS_ON', 'ACHIEVED', 'FAILED', 'INSPIRED_BY'],
+            enum: [
+              'WORKED_ON',
+              'KNOWS',
+              'LIVES_IN',
+              'VISITED',
+              'RELATED_TO',
+              'PART_OF',
+              'CAUSED_BY',
+              'LEADS_TO',
+              'CONFLICTS_WITH',
+              'SUPPORTS',
+              'DEPENDS_ON',
+              'ACHIEVED',
+              'FAILED',
+              'INSPIRED_BY',
+            ],
             description: 'The type of relationship between the two entities.',
           },
 

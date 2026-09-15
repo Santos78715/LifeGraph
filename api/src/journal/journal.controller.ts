@@ -6,37 +6,54 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JournalService } from './journal.service';
 import { CreateJournalDto } from './dto/create-journal.dto';
 import { UpdateJournalDto } from './dto/update-journal.dto';
 
 @Controller(['journal', 'journal-entry'])
+@UseGuards(JwtAuthGuard)
 export class JournalController {
   constructor(private readonly journalService: JournalService) {}
 
   @Post()
-  create(@Body() createJournalDto: CreateJournalDto) {
-    return this.journalService.create(createJournalDto);
+  create(
+    @Request() request: { user: { id: string } },
+    @Body() createJournalDto: CreateJournalDto,
+  ) {
+    return this.journalService.create(request.user.id, createJournalDto);
   }
 
   @Get()
-  findAll() {
-    return this.journalService.findAll();
+  findAll(@Request() request: { user: { id: string } }) {
+    return this.journalService.findAll(request.user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.journalService.findOne(id);
+  findOne(
+    @Request() request: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.journalService.findOne(request.user.id, id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJournalDto: UpdateJournalDto) {
-    return this.journalService.update(id, updateJournalDto);
+  update(
+    @Request() request: { user: { id: string } },
+    @Param('id') id: string,
+    @Body() updateJournalDto: UpdateJournalDto,
+  ) {
+    return this.journalService.update(request.user.id, id, updateJournalDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.journalService.remove(id);
+  remove(
+    @Request() request: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.journalService.remove(request.user.id, id);
   }
 }

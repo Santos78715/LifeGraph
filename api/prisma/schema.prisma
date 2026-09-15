@@ -339,6 +339,7 @@ enum MemorySourceType {
   DOCUMENT
   ENTITY
   MEMORY
+  DOCUMENT_CHUNK
 }
 
 enum RelationshipType {

@@ -11,9 +11,9 @@ export class JournalService {
     private journel: JournalProducer,
   ) {}
 
-  async create(createJournalDto: CreateJournalDto) {
+  async create(userId: string, createJournalDto: CreateJournalDto) {
     const journal = await this.prisma.journalEntry.create({
-      data: createJournalDto,
+      data: { ...createJournalDto, userId },
     });
     const jobId = await this.journel.addJob({
       journalEntryId: journal.id,
@@ -25,15 +25,16 @@ export class JournalService {
     return { journal, jobId };
   }
 
-  findAll() {
+  findAll(userId: string) {
     return this.prisma.journalEntry.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(id: string) {
-    const journal = await this.prisma.journalEntry.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string) {
+    const journal = await this.prisma.journalEntry.findFirst({
+      where: { id, userId },
     });
 
     if (!journal) {
@@ -43,16 +44,16 @@ export class JournalService {
     return journal;
   }
 
-  async update(id: string, updateJournalDto: UpdateJournalDto) {
-    await this.findOne(id);
+  async update(userId: string, id: string, updateJournalDto: UpdateJournalDto) {
+    await this.findOne(userId, id);
     return this.prisma.journalEntry.update({
       where: { id },
       data: updateJournalDto,
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(userId: string, id: string) {
+    await this.findOne(userId, id);
     await this.prisma.journalEntry.delete({ where: { id } });
     return { message: `Journal entry ${id} has been deleted` };
   }
