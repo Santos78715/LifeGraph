@@ -10,6 +10,12 @@ import { AiModule } from 'src/ai/ai.module';
 
 @Module({
   imports: [
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     PrismaModule,
     BullModule.registerQueue({
       name: QUEUE_NAMES.JOURNAL_QUEUE,

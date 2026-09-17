@@ -9,9 +9,10 @@ import {
 import { randomUUID } from 'node:crypto';
 import { AiService } from 'src/ai/ai.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { QUEUE_NAMES } from 'src/queue/queue.constants';
 import { JournalExtractionJob } from './journel.producer';
 import { journalJSONSchema, journalSchema } from './schema.constant';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { QUEUE_NAMES } from 'src/queue/queue.constants';
 
 type Extraction = {
   entities: Array<{ name: string; description: string; type: LifeEntityType }>;
@@ -24,14 +25,17 @@ type Extraction = {
   }>;
 };
 
+@Processor(QUEUE_NAMES.JOURNAL_QUEUE)
 @Injectable()
-export class JournalConsumer {
+export class JournalConsumer extends WorkerHost {
   private readonly logger = new Logger(JournalConsumer.name);
 
   constructor(
     private readonly aiService: AiService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) {
+    super();
+  }
 
   async process(job: Job<JournalExtractionJob, unknown, string>) {
     if (job.name !== 'journal_extraction') {
@@ -43,6 +47,7 @@ export class JournalConsumer {
       journalJSONSchema,
       journalSchema,
     )) as Extraction;
+    console.log('THis is extractino', extraction);
     const memories = await this.persistExtraction(job.data, extraction);
     await this.createMemoryEmbeddings(job.data.userId, memories);
 
@@ -59,6 +64,7 @@ export class JournalConsumer {
     job: JournalExtractionJob,
     extraction: Extraction,
   ) {
+    console.log(extraction);
     return this.prisma.$transaction(async (tx) => {
       const journal = await tx.journalEntry.findFirst({
         where: { id: job.journalEntryId, userId: job.userId },
@@ -170,8 +176,10 @@ export class JournalConsumer {
           update: { type: memory.type },
           select: { id: true, content: true },
         });
+        console.log(stored);
         memories.push(stored);
       }
+
       return memories;
     });
   }

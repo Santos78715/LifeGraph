@@ -24,7 +24,6 @@ export class PrismaService
 
   async onModuleInit() {
     await this.$connect();
-    console.log('');
     console.log('✅ Prisma connected');
   }
 
