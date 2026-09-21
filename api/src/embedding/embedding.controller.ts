@@ -1,34 +1,43 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Delete,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { EmbeddingService } from './embedding.service';
-import { CreateEmbeddingDto } from './dto/create-embedding.dto';
-import { UpdateEmbeddingDto } from './dto/update-embedding.dto';
 
+@ApiTags('Embedding')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('embedding')
 export class EmbeddingController {
   constructor(private readonly embeddingService: EmbeddingService) {}
 
-  @Post()
-  create(@Body() createEmbeddingDto: CreateEmbeddingDto) {
-    return this.embeddingService.create(createEmbeddingDto);
-  }
-
   @Get()
-  findAll() {
-    return this.embeddingService.findAll();
+  @ApiOperation({ summary: 'List all embeddings for the authenticated user' })
+  findAll(@Request() req: { user: { id: string } }) {
+    return this.embeddingService.findAll(req.user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.embeddingService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEmbeddingDto: UpdateEmbeddingDto) {
-    return this.embeddingService.update(+id, updateEmbeddingDto);
+  @ApiOperation({ summary: 'Get a specific embedding by ID' })
+  findOne(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.embeddingService.findOne(req.user.id, id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.embeddingService.remove(+id);
+  @ApiOperation({ summary: 'Delete an embedding' })
+  remove(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.embeddingService.remove(req.user.id, id);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
@@ -34,7 +34,7 @@ export class AuthService {
     return user;
   }
 
-  async login(user: any) {
+  async login(user: { id: string; email: string; name: string; timezone: string }) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -52,6 +52,8 @@ export class AuthService {
   }
 
   async register(email: string, password: string, name: string, timezone: string = 'UTC') {
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) throw new ConflictException('Email already exists');
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.prisma.user.create({

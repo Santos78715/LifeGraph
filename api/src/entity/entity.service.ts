@@ -8,36 +8,39 @@ import { PrismaService } from '../prisma/prisma.service';
 export class EntityService {
   constructor(private prisma: PrismaService) {}
 
-  create(createEntityDto: CreateEntityDto) {
+  create(userId: string, createEntityDto: CreateEntityDto) {
     return this.prisma.lifeEntity.create({
-      data: createEntityDto as Prisma.LifeEntityUncheckedCreateInput,
+      data: { ...createEntityDto, userId } as Prisma.LifeEntityUncheckedCreateInput,
     });
   }
 
-  findAll() {
-    return this.prisma.lifeEntity.findMany({ orderBy: { createdAt: 'desc' } });
+  findAll(userId: string) {
+    return this.prisma.lifeEntity.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  async findOne(id: string) {
-    const entity = await this.prisma.lifeEntity.findUnique({ where: { id } });
-
+  async findOne(userId: string, id: string) {
+    const entity = await this.prisma.lifeEntity.findFirst({
+      where: { id, userId },
+    });
     if (!entity) {
       throw new NotFoundException(`Entity ${id} not found`);
     }
-
     return entity;
   }
 
-  async update(id: string, updateEntityDto: UpdateEntityDto) {
-    await this.findOne(id);
+  async update(userId: string, id: string, updateEntityDto: UpdateEntityDto) {
+    await this.findOne(userId, id);
     return this.prisma.lifeEntity.update({
       where: { id },
       data: updateEntityDto as Prisma.LifeEntityUncheckedUpdateInput,
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(userId: string, id: string) {
+    await this.findOne(userId, id);
     await this.prisma.lifeEntity.delete({ where: { id } });
     return { message: `Entity ${id} has been deleted` };
   }

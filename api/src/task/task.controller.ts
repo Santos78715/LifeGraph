@@ -6,37 +6,62 @@ import {
   Param,
   Patch,
   Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskService } from './task.service';
 
+@ApiTags('Task')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.taskService.create(createTaskDto);
+  @ApiOperation({ summary: 'Create a new task' })
+  create(
+    @Request() req: { user: { id: string } },
+    @Body() createTaskDto: CreateTaskDto,
+  ) {
+    return this.taskService.create(req.user.id, createTaskDto);
   }
 
   @Get()
-  findAll() {
-    return this.taskService.findAll();
+  @ApiOperation({ summary: 'List all tasks for the authenticated user' })
+  findAll(@Request() req: { user: { id: string } }) {
+    return this.taskService.findAll(req.user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.taskService.findOne(id);
+  @ApiOperation({ summary: 'Get a specific task by ID' })
+  findOne(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.taskService.findOne(req.user.id, id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(id, updateTaskDto);
+  @ApiOperation({ summary: 'Update a task' })
+  update(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+  ) {
+    return this.taskService.update(req.user.id, id, updateTaskDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.taskService.remove(id);
+  @ApiOperation({ summary: 'Delete a task' })
+  remove(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.taskService.remove(req.user.id, id);
   }
 }

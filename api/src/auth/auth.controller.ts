@@ -1,102 +1,39 @@
-import { Controller, Post, Body, UseGuards, Request, BadRequestException, Res, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { Body, Controller, Post, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user' })
   async register(
-    @Body() body: { email: string; password: string; name: string; timezone?: string },
-    @Res() res: Response,
+    @Body() body: RegisterDto,
   ) {
-    try {
-      if (!body.email || !body.password || !body.name) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Email, password, and name are required',
-        });
-      }
-
-      const result = await this.authService.register(
-        body.email,
-        body.password,
-        body.name,
-        body.timezone || 'UTC',
-      );
-
-      return res.status(HttpStatus.CREATED).json({
-        statusCode: HttpStatus.CREATED,
-        message: 'User registered successfully',
-        data: result,
-      });
-    } catch (error: any) {
-      if (error.code === 'P2002') {
-        return res.status(HttpStatus.CONFLICT).json({
-          statusCode: HttpStatus.CONFLICT,
-          message: 'Email already exists',
-        });
-      }
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'An error occurred during registration',
-      });
-    }
+    return this.authService.register(body.email, body.password, body.name, body.timezone);
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login with email and password' })
   async login(
-    @Body() body: { email: string; password: string },
-    @Res() res: Response,
+    @Body() body: LoginDto,
   ) {
-    try {
-      if (!body.email || !body.password) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Email and password are required',
-        });
-      }
-
-      const user = await this.authService.validateUser(body.email, body.password);
-
-      if (!user) {
-        return res.status(HttpStatus.UNAUTHORIZED).json({
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: 'Invalid email or password',
-        });
-      }
-
-      const result = await this.authService.login(user);
-
-      return res.status(HttpStatus.OK).json({
-        statusCode: HttpStatus.OK,
-        message: 'Login successful',
-        data: result,
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'An error occurred during login',
-      });
-    }
+    const user = await this.authService.validateUser(body.email, body.password);
+    if (!user) throw new UnauthorizedException('Invalid email or password');
+    return this.authService.login(user);
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Post('profile')
-  async getProfile(@Request() req: any, @Res() res: Response) {
-    return res.status(HttpStatus.OK).json({
-      statusCode: HttpStatus.OK,
-      message: 'Profile retrieved successfully',
-      data: {
-        id: req.user.id,
-        email: req.user.email,
-        name: req.user.name,
-        timezone: req.user.timezone,
-        createdAt: req.user.createdAt,
-        updatedAt: req.user.updatedAt,
-      },
-    });
+  @ApiOperation({ summary: 'Get the authenticated user profile' })
+  getProfile(@Request() req: { user: Record<string, unknown> }) {
+    const { password: _password, ...user } = req.user;
+    return user;
   }
 }

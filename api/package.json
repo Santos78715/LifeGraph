@@ -37,6 +37,7 @@
     "@nestjs/mapped-types": "^2.0.5",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/swagger": "^12.0.1",
     "@nestjs/throttler": "^6.5.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
@@ -92,7 +93,8 @@
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1",
       "^generated/(.*)$": "<rootDir>/../generated/$1",
-      "^@nestjs/bullmq$": "<rootDir>/test/mocks/nest-bullmq.ts"
+      "^@nestjs/bullmq$": "<rootDir>/test/mocks/nest-bullmq.ts",
+      "^@nestjs/swagger$": "<rootDir>/test/mocks/nest-swagger.ts"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

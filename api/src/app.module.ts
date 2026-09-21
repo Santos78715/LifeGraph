@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -18,18 +19,21 @@ import { GoalModule } from './goal/goal.module';
 import { TaskModule } from './task/task.module';
 import { HabitModule } from './habit/habit.module';
 import { EventModule } from './event/event.module';
-import { QueueModule } from './queue/queue.module';
 import { JournalModule } from './journal/journal.module';
 import { DocumentModule } from './document/document.module';
+import { ConversationModule } from './conversation/conversation.module';
+import { validateEnvironment } from './app.config';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validateEnvironment,
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minute
-        limit: 10, // 10 requests per minute
+        ttl: 60000,
+        limit: 10,
       },
     ]),
     PrismaModule,
@@ -49,8 +53,9 @@ import { DocumentModule } from './document/document.module';
     TaskModule,
     HabitModule,
     EventModule,
+    ConversationModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

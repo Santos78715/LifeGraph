@@ -38,7 +38,8 @@ jobs:
       REDIS_URL: redis://localhost:6379
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      JWT_SECRET: ci-only-secret
+      API_KEY: ci-placeholder-key
+      JWT_SECRET: ci-only-secret-that-is-at-least-32-characters
       JWT_EXPIRATION: 7d
       NODE_ENV: test
 

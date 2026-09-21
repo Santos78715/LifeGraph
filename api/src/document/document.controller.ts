@@ -8,16 +8,20 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { DocumentService } from './document.service';
 
-@Controller('documents')
+@ApiTags('Document')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
+@Controller('documents')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Post('text')
+  @ApiOperation({ summary: 'Upload a text document (auto-chunks and embeds)' })
   create(
     @Request() request: { user: { id: string } },
     @Body() input: CreateDocumentDto,
@@ -26,11 +30,13 @@ export class DocumentController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'List all documents' })
   findAll(@Request() request: { user: { id: string } }) {
     return this.documentService.findAll(request.user.id);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a document with its chunks' })
   findOne(
     @Request() request: { user: { id: string } },
     @Param('id') id: string,
@@ -39,6 +45,7 @@ export class DocumentController {
   }
 
   @Post(':id/analyze')
+  @ApiOperation({ summary: 'Analyze a document with AI' })
   analyze(
     @Request() request: { user: { id: string } },
     @Param('id') id: string,
@@ -47,6 +54,7 @@ export class DocumentController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a document' })
   remove(
     @Request() request: { user: { id: string } },
     @Param('id') id: string,

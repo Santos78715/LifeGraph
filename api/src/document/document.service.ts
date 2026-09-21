@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { DocumentStatus, MemorySourceType } from 'generated/prisma/client';
 import { randomUUID } from 'node:crypto';
 import { AiService } from 'src/ai/ai.service';
@@ -71,15 +71,23 @@ export class DocumentService {
   }
 
   async remove(userId: string, id: string) {
-    await this.findOne(userId, id);
-    await this.prisma.document.delete({ where: { id } });
+    const document = await this.findOne(userId, id);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`
+        DELETE FROM "Embedding"
+        WHERE "userId" = ${userId}
+          AND "sourceType" = ${MemorySourceType.DOCUMENT_CHUNK}::"MemorySourceType"
+          AND "sourceId" IN (SELECT "id" FROM "DocumentChunk" WHERE "documentId" = ${document.id})
+      `;
+      await tx.document.delete({ where: { id: document.id } });
+    });
     return { message: `Document ${id} has been deleted` };
   }
 
   async analyze(userId: string, id: string) {
     const document = await this.findOne(userId, id);
     if (document.status !== DocumentStatus.READY) {
-      throw new Error(`Document ${id} is not ready for analysis`);
+      throw new ServiceUnavailableException(`Document ${id} is not ready for analysis`);
     }
 
     // Keep requests bounded even for the largest accepted document. The entire

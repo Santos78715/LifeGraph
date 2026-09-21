@@ -6,37 +6,62 @@ import {
   Param,
   Patch,
   Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
 import { GoalService } from './goal.service';
 
+@ApiTags('Goal')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('goal')
 export class GoalController {
   constructor(private readonly goalService: GoalService) {}
 
   @Post()
-  create(@Body() createGoalDto: CreateGoalDto) {
-    return this.goalService.create(createGoalDto);
+  @ApiOperation({ summary: 'Create a new goal' })
+  create(
+    @Request() req: { user: { id: string } },
+    @Body() createGoalDto: CreateGoalDto,
+  ) {
+    return this.goalService.create(req.user.id, createGoalDto);
   }
 
   @Get()
-  findAll() {
-    return this.goalService.findAll();
+  @ApiOperation({ summary: 'List all goals for the authenticated user' })
+  findAll(@Request() req: { user: { id: string } }) {
+    return this.goalService.findAll(req.user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.goalService.findOne(id);
+  @ApiOperation({ summary: 'Get a specific goal with its tasks' })
+  findOne(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.goalService.findOne(req.user.id, id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGoalDto: UpdateGoalDto) {
-    return this.goalService.update(id, updateGoalDto);
+  @ApiOperation({ summary: 'Update a goal' })
+  update(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+    @Body() updateGoalDto: UpdateGoalDto,
+  ) {
+    return this.goalService.update(req.user.id, id, updateGoalDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.goalService.remove(id);
+  @ApiOperation({ summary: 'Delete a goal' })
+  remove(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.goalService.remove(req.user.id, id);
   }
 }

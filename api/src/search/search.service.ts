@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { MemorySourceType } from 'generated/prisma/client';
 import { AiService } from 'src/ai/ai.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -23,8 +23,6 @@ export class SearchService {
   ) {}
 
   async search(userId: string, input: CreateSearchDto) {
-    console.log('Search started');
-
     // 1. Generate embedding for the user's query
     const embeddingResponse = await this.aiService.createEmbeddings([
       input.query,
@@ -33,12 +31,10 @@ export class SearchService {
     const vector = embeddingResponse.embeddings?.[0]?.values;
 
     if (!vector?.length) {
-      throw new Error(
+      throw new ServiceUnavailableException(
         'Embedding provider returned no vector for the search query',
       );
     }
-
-    console.log('Embedding vector length:', vector.length);
 
     // 2. Convert the JS number[] into pgvector string format
     //
@@ -113,17 +109,9 @@ export class SearchService {
 
         LIMIT ${input.limit}
       `;
-    } catch (error) {
-      console.error('========================================');
-      console.error('DATABASE SEARCH ERROR');
-      console.error('========================================');
-      console.error(error);
-      console.error('========================================');
-
-      throw error;
+    } catch {
+      throw new ServiceUnavailableException('Semantic search is temporarily unavailable');
     }
-
-    console.log('Sources found:', sources.length);
 
     // 4. No relevant sources
     if (!sources.length) {
@@ -140,8 +128,6 @@ export class SearchService {
           `[${index + 1}] (${source.sourceKind}) ${source.content}`,
       )
       .join('\n');
-
-    console.log('Context:', context);
 
     // 6. Ask AI to answer using retrieved context
     const answer = await this.aiService.answerWithContext(input.query, context);

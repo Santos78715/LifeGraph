@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
@@ -8,21 +9,21 @@ import {
 import { LifeEntityType } from '../../../generated/prisma/client';
 
 export class CreateEntityDto {
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
-
+  @ApiProperty({ enum: LifeEntityType, description: 'Entity type' })
   @IsEnum(LifeEntityType)
   type: LifeEntityType;
 
+  @ApiProperty({ description: 'Entity name', example: 'Acme Corp' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiPropertyOptional({ description: 'Entity description' })
   @IsOptional()
   @IsString()
   description?: string;
 
+  @ApiPropertyOptional({ description: 'Additional metadata' })
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;

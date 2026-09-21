@@ -9,17 +9,21 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JournalService } from './journal.service';
 import { CreateJournalDto } from './dto/create-journal.dto';
 import { UpdateJournalDto } from './dto/update-journal.dto';
 
-@Controller(['journal', 'journal-entry'])
+@ApiTags('Journal')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
+@Controller(['journal', 'journal-entry'])
 export class JournalController {
   constructor(private readonly journalService: JournalService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a journal entry (triggers AI extraction)' })
   create(
     @Request() request: { user: { id: string } },
     @Body() createJournalDto: CreateJournalDto,
@@ -28,11 +32,13 @@ export class JournalController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'List all journal entries' })
   findAll(@Request() request: { user: { id: string } }) {
     return this.journalService.findAll(request.user.id);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a specific journal entry' })
   findOne(
     @Request() request: { user: { id: string } },
     @Param('id') id: string,
@@ -41,6 +47,7 @@ export class JournalController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update a journal entry' })
   update(
     @Request() request: { user: { id: string } },
     @Param('id') id: string,
@@ -50,6 +57,7 @@ export class JournalController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a journal entry' })
   remove(
     @Request() request: { user: { id: string } },
     @Param('id') id: string,
